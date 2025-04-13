@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>美食日記</title>
+    <style>
+        /* 設定整體頁面的字型與背景 */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            background: #faf7f2;
+            color: #333;
+        }
+
+        /* 頁首樣式，設置顏色、字型和觸控效果 */
+        header {
+            background: #ff8c69;
+            color: white;
+            padding: 20px;
+            font-size: 28px;
+            cursor: pointer;
+        }
+
+        /* 項目導航欄，設置背景、排列和間隔 */
+        nav {
+            background: #ffe2d1;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        /* 導航欄中的每個鏈接的樣式 */
+        nav a {
+            color: #333;
+            text-decoration: none;
+            padding: 10px 20px;
+            background: #ffc2a1;
+            border-radius: 10px;
+            transition: 0.3s;
+        }
+
+        /* 當導航鏈接被點擊時，會變大並改變背景顏色 */
+        nav a:hover {
+            background: #ffddb8;
+            transform: scale(1.1);
+        }
+
+        /* 主內容區塊的樣式 */
+        main {
+            padding: 30px;
+            background: white;
+            margin: 20px auto;
+            width: 80%;
+            border-radius: 10px;
+            visibility: hidden;
+            opacity: 0;
+            transition: visibility 0s, opacity 0.3s linear;
+        }
+
+        /* 當主內容區塊啟用時，將顯示 */
+        main.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* 頁腳樣式，固定在頁面底部 */
+        footer {
+            background: #ff8c69;
+            color: white;
+            padding: 10px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        /* 按鈕樣式，設置顏色、大小、邊框和觸控效果 */
+        button {
+            padding: 12px 18px;
+            font-size: 18px;
+            cursor: pointer;
+            background: #ff8c69;
+            color: white;
+            border-radius: 8px;
+            transition: 0.3s;
+            border: none;
+        }
+
+        /* 當按鈕被懸停時，顏色會變化並放大 */
+        button:hover {
+            background: #ffb394;
+            transform: scale(1.05);
+        }
+
+        /* 記事本樣式，包裹住手寫筆記的區域 */
+        .note-wrapper {
+            position: relative;
+            margin: 20px auto;
+            width: 100%;
+            max-width: 700px;
+        }
+
+        /* 記事本的裝飾：紙膠帶的效果 */
+        .note-wrapper::before,
+        .note-wrapper::after {
+            content: '';
+            position: absolute;
+            width: 60px;
+            height: 20px;
+            background: repeating-linear-gradient(
+                45deg,
+                #ffc2a1,
+                #ffc2a1 5px,
+                #ffe2d1 5px,
+                #ffe2d1 10px
+            );
+            opacity: 0.6;
+            transform: rotate(-5deg);
+            top: -10px;
+            border-radius: 4px;
+            z-index: 1;
+        }
+
+        /* 裝飾紙膠帶的位置調整 */
+        .note-wrapper::after {
+            right: 20px;
+            transform: rotate(8deg);
+        }
+
+        /* 手寫風格的 textarea */
+        textarea {
+            width: 100%;
+            min-height: 180px;
+            padding: 20px 25px;
+            border-radius: 16px;
+            border: 2px dashed #ffb394;
+            background: #fffdf6;
+            font-size: 18px;
+            line-height: 1.8;
+            font-family: 'Segoe Print', 'Comic Sans MS', cursive;
+            box-shadow: 6px 6px 15px rgba(255, 140, 105, 0.15);
+            transition: box-shadow 0.3s, border-color 0.3s;
+            resize: vertical;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* 當 textarea 被點擊時，會變色並有陰影效果 */
+        textarea:focus {
+            border-color: #ff8c69;
+            box-shadow: 0 0 12px rgba(255, 140, 105, 0.3);
+            outline: none;
+        }
+
+        /* 美食紀錄歷史項目的樣式 */
+        .history-item {
+            background: #fffaf3;
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* 當美食紀錄被懸停時，會放大並顯示陰影 */
+        .history-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        /* 美食紀錄中的圖片 */
+        .history-item img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        /* 刪除按鈕的樣式 */
+        .delete-btn {
+            background: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            position: absolute;
+            right: 10px;
+            top: 10px;
+        }
+
+        /* 評分區域的樣式 */
+        .rating {
+            display: flex;
+            justify-content: center;
+            margin: 10px 0;
+        }
+
+        /* 評分星星的樣式 */
+        .rating span {
+            font-size: 30px;
+            cursor: pointer;
+            color: #ccc;
+            transition: color 0.3s;
+        }
+
+        /* 當評分星星被選中時，變為金色 */
+        .rating span.active {
+            color: gold;
+        }
+
+        /* 手機屏幕的響應式設計 */
+        @media (max-width: 600px) {
+            nav {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            main {
+                width: 95%;
+                max-width: 500px;
+                padding: 15px;
+            }
+
+            textarea,
+            select,
+            input {
+                width: 100%;
+            }
+
+            .rating span {
+                font-size: 24px;
+            }
+
+            .history-item img {
+                width: 80px;
+                height: 80px;
+            }
+
+            button {
+                width: 100%;
+                font-size: 16px;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 頁首部分 -->
+    <header onclick="window.location.href = window.location.pathname;">美食日記</header>
+
+    <!-- 導航欄 -->
+    <nav>
+        <a href="#" data-target="history-page">吃過的美食</a>
+        <a href="#" data-target="main-content">編輯日記</a>
+        <a href="#" onclick="showSelection()">幫你選擇</a>
+    </nav>
+
+    <!-- 主要內容區，編輯日記部分 -->
+    <main id="main-content" class="active">
+        <h2>新增美食紀錄</h2>
+        <div class="note-wrapper">
+            <!-- 手寫風格的文本框 -->
+            <textarea id="food-entry" placeholder="請輸入你的美食紀錄..."></textarea>
+        </div>
+        <!-- 圖片上傳區域 -->
+        <input type="file" id="image-upload" accept="image/*">
+        <!-- 類別選擇下拉框 -->
+        <select id="category">
+            <option value="早餐">早餐</option>
+            <option value="午餐">午餐</option>
+            <option value="晚餐">晚餐</option>
+            <option value="甜點">甜點</option>
+        </select>
+
+        <!-- 評分星星 -->
+        <div class="rating" id="star-rating">
+            <span data-value="1">★</span>
+            <span data-value="2">★</span>
+            <span data-value="3">★</span>
+            <span data-value="4">★</span>
+            <span data-value="5">★</span>
+        </div>
+
+        <!-- 儲存日記的按鈕 -->
+        <button onclick="saveDiary()">儲存日記</button>
+        <div id="saved-message" style="display:none; color:green; margin-top:10px;">日記已儲存！</div>
+    </main>
+
+    <!-- 美食歷史紀錄頁面 -->
+    <main id="history-page">
+        <h2>吃過的美食</h2>
+        <div id="history-content" style="display: flex; flex-direction: column; gap: 10px;"></div>
+    </main>
+
+    <!-- 頁腳部分 -->
+    <footer>&copy; 2025 美食日記. 保留所有權利.</footer>
+
+    <script>
+        // 監聽導航欄的點擊，切換顯示不同頁面
+        document.querySelectorAll('nav a[data-target]').forEach(link => {
+            link.addEventListener('click', function () {
+                showPage(this.getAttribute('data-target'));
+            });
+        });
+
+        // 顯示相應頁面
+        function showPage(pageId) {
+            document.querySelectorAll('main').forEach(main => main.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            if (pageId === 'history-page') loadHistory();
+        }
+
+        // 加載歷史紀錄
+        function loadHistory() {
+            let historyContent = document.getElementById('history-content');
+            let diaryEntries = JSON.parse(localStorage.getItem('foodDiary')) || [];
+            historyContent.innerHTML = diaryEntries.length > 0 ?
+                diaryEntries.map((entry, index) => `
+                    <div class='history-item'>
+                        <strong>${entry.category}</strong>: ${entry.text}<br>
+                        ${entry.image ? `<img src='${entry.image}' alt='食物圖片'><br>` : ''}
+                        <span>評分: ${'★'.repeat(entry.rating)}${'☆'.repeat(5 - entry.rating)}</span>
+                        <button class='delete-btn' onclick='deleteEntry(${index})'>刪除</button>
+                    </div>`).join('') : '目前沒有紀錄';
+        }
+
+        // 儲存日記
+        function saveDiary() {
+            let diaryText = document.getElementById('food-entry').value.trim();
+            let category = document.getElementById('category').value;
+            let rating = selectedRating;
+            let imageInput = document.getElementById('image-upload');
+
+            if (!diaryText || !rating) return;
+
+            let reader = new FileReader();
+            reader.onload = function () {
+                let imageData = reader.result;
+                let diaryEntries = JSON.parse(localStorage.getItem('foodDiary')) || [];
+                diaryEntries.push({ text: diaryText, category, rating, image: imageData });
+                localStorage.setItem('foodDiary', JSON.stringify(diaryEntries));
+                resetForm();
+            }
+
+            if (imageInput.files.length > 0) {
+                reader.readAsDataURL(imageInput.files[0]);
+            } else {
+                let diaryEntries = JSON.parse(localStorage.getItem('foodDiary')) || [];
+                diaryEntries.push({ text: diaryText, category, rating, image: '' });
+                localStorage.setItem('foodDiary', JSON.stringify(diaryEntries));
+                resetForm();
+            }
+        }
+
+        // 刪除紀錄
+        function deleteEntry(index) {
+            let diaryEntries = JSON.parse(localStorage.getItem('foodDiary')) || [];
+            diaryEntries.splice(index, 1);
+            localStorage.setItem('foodDiary', JSON.stringify(diaryEntries));
+            loadHistory();
+        }
+
+        // 重置表單
+        function resetForm() {
+            const savedMsg = document.getElementById('saved-message');
+            savedMsg.style.display = 'block';
+            savedMsg.animate([
+                { transform: 'scale(0.9)', opacity: 0 },
+                { transform: 'scale(1)', opacity: 1 }
+            ], {
+                duration: 300,
+                easing: 'ease-out'
+            });
+            setTimeout(() => savedMsg.style.display = 'none', 2000);
+            document.getElementById('food-entry').value = "";
+            document.getElementById('image-upload').value = "";
+            selectedRating = 0;
+            document.querySelectorAll('.rating span').forEach(star => star.classList.remove('active'));
+        }
+
+        // 設定評分
+        let selectedRating = 0;
+        document.querySelectorAll('.rating span').forEach(star => {
+            star.addEventListener('click', function () {
+                selectedRating = this.dataset.value;
+                document.querySelectorAll('.rating span').forEach(s => s.classList.toggle('active', s.dataset.value <= selectedRating));
+            });
+        });
+    </script>
+</body>
+
+</html>
